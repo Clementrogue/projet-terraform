@@ -1,6 +1,6 @@
 aws_region                = "us-east-1"
-vpc_id                    = "vpc-0a2295cf7aa396de8"
-public_subnets            = ["subnet-0b43a2a7e03049313", "subnet-0d6029d831fcf4055"]
-private_subnets           = ["subnet-00ac542c287ac6b8a", "subnet-0d79e4f4d6db9f5ab"]
-app_ami_id                = "i-04127cba5a3c9d93a" 
+vpc_id                    = "vpc-01a52f673c13dbfac"
+public_subnets            = ["subnet-0491206f857ea7968", "subnet-0c2a49daafbbfd8e5"]
+private_subnets           = ["subnet-0db23a747a537c9af", "subnet-036d612d2ffd5edcf"]
+app_ami_id                = "ami-02dfbd4ff395f2a1b" 
 iam_instance_profile_name = "student-phase2-web"
