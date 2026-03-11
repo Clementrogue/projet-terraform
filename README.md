@@ -41,6 +41,7 @@ Ports ouverts :
 - **80** : HTTP
 
 ---
+<img width="501" height="681" alt="image" src="https://github.com/user-attachments/assets/0f3b0c67-7a19-49b5-8a33-6784aad7882e" />
 
 ## Déploiement
 
