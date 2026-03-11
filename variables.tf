@@ -1,15 +1,29 @@
-variable "region" {
-  default = "us-east-1"
+variable "aws_region" {
+  type    = string
+  default = "eu-west-1"
 }
 
-variable "ami" {
-  description = "Ubuntu AMI"
+variable "vpc_id" {
+  type = string
+}
+
+variable "public_subnets" {
+  type = list(string)
+}
+
+variable "private_subnets" {
+  type = list(string)
+}
+
+variable "app_ami_id" {
+  type = string
 }
 
 variable "instance_type" {
+  type    = string
   default = "t2.micro"
 }
 
-variable "key_name" {
-  description = "AWS key pair"
+variable "iam_instance_profile_name" {
+  type = string
 }

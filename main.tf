@@ -1,72 +1,10 @@
-provider "aws" {
-  region = var.region
-}
-
-# VPC
-
-resource "aws_vpc" "main" {
-  cidr_block = "10.0.0.0/16"
-
-  tags = {
-    Name = "student-vpc"
-  }
-}
-
-# Internet Gateway
-
-resource "aws_internet_gateway" "igw" {
-  vpc_id = aws_vpc.main.id
-}
-
-# Subnet public
-
-resource "aws_subnet" "public" {
-  vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.0.1.0/24"
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name = "public-subnet"
-  }
-}
-
-# Route table
-
-resource "aws_route_table" "public_rt" {
-  vpc_id = aws_vpc.main.id
-}
-
-# Route Internet
-
-resource "aws_route" "internet_access" {
-  route_table_id         = aws_route_table.public_rt.id
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.igw.id
-}
-
-# Association subnet / route table
-
-resource "aws_route_table_association" "assoc" {
-  subnet_id      = aws_subnet.public.id
-  route_table_id = aws_route_table.public_rt.id
-}
-
-# Security Group
-
-resource "aws_security_group" "web_sg" {
-  name   = "web-sg"
-  vpc_id = aws_vpc.main.id
+resource "aws_security_group" "alb_sg" {
+  name   = "alb-security-group"
+  vpc_id = var.vpc_id
 
   ingress {
     from_port   = 80
     to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -79,20 +17,98 @@ resource "aws_security_group" "web_sg" {
   }
 }
 
-# EC2
+resource "aws_security_group" "asg_sg" {
+  name   = "asg-security-group"
+  vpc_id = var.vpc_id
 
-resource "aws_instance" "web" {
+  ingress {
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb_sg.id]
+  }
 
-  ami           = var.ami
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_lb" "app_alb" {
+  name               = "app-alb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.alb_sg.id]
+  subnets            = var.public_subnets
+}
+
+resource "aws_lb_target_group" "app_tg" {
+  name     = "app-tg"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = var.vpc_id
+
+  health_check {
+    path                = "/"
+    protocol            = "HTTP"
+    matcher             = "200"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 3
+    unhealthy_threshold = 3
+  }
+}
+
+resource "aws_lb_listener" "app_listener" {
+  load_balancer_arn = aws_lb.app_alb.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.app_tg.arn
+  }
+}
+
+resource "aws_launch_template" "app_lt" {
+  name          = "app-launch-template"
+  image_id      = var.app_ami_id
   instance_type = var.instance_type
-  key_name      = var.key_name
 
-  subnet_id              = aws_subnet.public.id
-  vpc_security_group_ids = [aws_security_group.web_sg.id]
+  iam_instance_profile {
+    name = var.iam_instance_profile_name
+  }
 
-  user_data = file("user_data.sh")
+  network_interfaces {
+    security_groups = [aws_security_group.asg_sg.id]
+  }
+}
 
-  tags = {
-    Name = "student-web-server"
+resource "aws_autoscaling_group" "app_asg" {
+  name                = "app-asg"
+  vpc_zone_identifier = var.private_subnets
+  target_group_arns   = [aws_lb_target_group.app_tg.arn]
+  min_size            = 2
+  max_size            = 4
+  desired_capacity    = 2
+
+  launch_template {
+    id      = aws_launch_template.app_lt.id
+    version = "$Latest"
+  }
+}
+
+resource "aws_autoscaling_policy" "cpu_tracking" {
+  name                   = "cpu-tracking-policy"
+  policy_type            = "TargetTrackingScaling"
+  autoscaling_group_name = aws_autoscaling_group.app_asg.name
+
+  target_tracking_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ASGAverageCPUUtilization"
+    }
+    target_value = 50.0
   }
 }
