@@ -1,78 +1,44 @@
-# AWS Terraform - Student Records (Phase 1)
+# Phase 4 : Packaging de l'application (Docker & ECR)
 
-## Description
+## Objectif
+L'objectif de cette phase est de moderniser le déploiement de l'application en la conteneurisant avec Docker, puis en stockant l'image de manière sécurisée sur un registre privé AWS ECR (Elastic Container Registry). 
 
-Ce projet déploie une application web de gestion des dossiers étudiants sur AWS en utilisant **Terraform**.
+## Architecture déployée
+* **Dockerfile :** Création d'une image basée sur `node:18`, téléchargeant le code source de l'application depuis S3, installant les dépendances (`npm install`) et exposant le port 80.
+* **Amazon ECR :** Registre privé Terraformé pour héberger l'image Docker (`student-app-repo`).
+* **Instance EC2 de test :** Déploiement via Terraform d'une machine isolée avec un script `user_data` pour installer Docker, s'authentifier sur ECR, et lancer le conteneur automatiquement.
 
-L'objectif de la phase 1 est de créer une **infrastructure simple** permettant d'héberger l'application sur une **instance EC2** accessible depuis Internet.
+## Déploiement et Stockage de l'image
 
----
+1. **Créer le registre ECR avec Terraform :**
+   \`\`\`bash
+   terraform apply -target=aws_ecr_repository.app_repo -auto-approve
+   \`\`\`
+2. **Construire l'image Docker localement :**
+   \`\`\`bash
+   cd app/
+   docker build -t student-app-repo:v1 .
+   \`\`\`
+3. **S'authentifier et pousser sur AWS ECR :**
+   \`\`\`bash
+   aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com
+   docker tag student-app-repo:v1 <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/student-app-repo:v1
+   docker push <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/student-app-repo:v1
+   \`\`\`
 
-## Architecture
-Internet
-│
-Internet Gateway
-│
-VPC
-│
-Public Subnet
-│
-EC2 (Ubuntu)
-│
-Node.js Application + MySQL
+## Validation des conteneurs
 
+**1. Test local (Terminal) :**
+Exécution du conteneur en simulant les variables d'environnement de la base de données :
+\`\`\`bash
+docker run -d -p 8080:80 -e APP_DB_HOST=127.0.0.1 -e APP_DB_USER=nodeapp -e APP_DB_PASSWORD=student12 -e APP_DB_NAME=STUDENTS -e APP_PORT=80 student-app-repo:v1
+curl http://localhost:8080
+\`\`\`
+*(Vérification : Le code HTML de la page d'accueil doit s'afficher).*
 
----
-
-## Infrastructure AWS
-
-Les ressources suivantes sont créées avec Terraform :
-
-- VPC
-- Subnet public
-- Internet Gateway
-- Route Table
-- Security Group
-- Instance EC2
-
-Ports ouverts :
-
-- **22** : SSH
-- **80** : HTTP
-
----
-<img width="501" height="681" alt="image" src="https://github.com/user-attachments/assets/0f3b0c67-7a19-49b5-8a33-6784aad7882e" />
-
-## Déploiement
-
-### Initialiser Terraform
-
-```bash
-terraform init
-```
-
-### Vérifier la configuration
-
-```bash
-terraform validate
-```
-
-### Voir le plan
-
-```bash
-terraform plan
-```
-
-### Déployer l'infrastructure
-
-```bash
-terraform apply
-```
-
-## Accès à l'application
-Une fois l'infrastructure déployée, l'application est accessible via l'adresse publique de l'instance EC2 :
-```bash
-http://PUBLIC_IP
-```
-Terraform affiche l'adresse IP dans les outputs après le déploiement.
-
+**2. Test Cloud (AWS EC2) :**
+Déploiement de l'infrastructure de test Terraform :
+\`\`\`bash
+terraform apply -auto-approve
+\`\`\`
+*(Vérification : Copier l'IP publique générée en sortie par Terraform dans un navigateur pour visualiser l'application conteneurisée tournant sur AWS).*
