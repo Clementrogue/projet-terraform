@@ -1,4 +1,3 @@
-cat <<EOF > main.tf
 resource "aws_security_group" "alb_sg" {
   name   = "alb-security-group"
   vpc_id = var.vpc_id
@@ -99,7 +98,7 @@ resource "aws_autoscaling_group" "app_asg" {
 
   launch_template {
     id      = aws_launch_template.app_lt.id
-    version = "\$Latest"
+    version = "$Latest"
   }
 }
 
@@ -115,4 +114,3 @@ resource "aws_autoscaling_policy" "cpu_tracking" {
     target_value = 20.0
   }
 }
-EOF
