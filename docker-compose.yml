@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  student-app:
+    image: ${CI_REGISTRY_IMAGE}/student-app:latest
+    container_name: student-app
+    restart: always
+    ports:
+      - "80:3000"
+    environment:
+      APP_DB_HOST: ${APP_DB_HOST}
+      APP_DB_USER: ${APP_DB_USER}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD}
+      APP_DB_NAME: ${APP_DB_NAME}
+      APP_PORT: 3000

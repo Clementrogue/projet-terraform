@@ -1,0 +1,17 @@
+{
+  "name": "student-app",
+  "version": "1.0.0",
+  "description": "Student Records Application",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "build": "echo Build completed",
+    "test": "echo No tests configured"
+  },
+  "dependencies": {
+    "express": "^4.22.1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
