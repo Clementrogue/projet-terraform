@@ -1,78 +1,33 @@
-# AWS Terraform - Student Records (Phase 1)
+# Phase 3 : Haute Disponibilité et Mise à l'Échelle Automatique
 
-## Description
+## Objectif
+L'objectif de cette phase est de rendre l'application web hautement disponible et résiliente aux pics de trafic en utilisant les services AWS d'équilibrage de charge et d'Auto Scaling via Terraform.
 
-Ce projet déploie une application web de gestion des dossiers étudiants sur AWS en utilisant **Terraform**.
-
-L'objectif de la phase 1 est de créer une **infrastructure simple** permettant d'héberger l'application sur une **instance EC2** accessible depuis Internet.
-
----
-
-## Architecture
-Internet
-│
-Internet Gateway
-│
-VPC
-│
-Public Subnet
-│
-EC2 (Ubuntu)
-│
-Node.js Application + MySQL
-
-
----
-
-## Infrastructure AWS
-
-Les ressources suivantes sont créées avec Terraform :
-
-- VPC
-- Subnet public
-- Internet Gateway
-- Route Table
-- Security Group
-- Instance EC2
-
-Ports ouverts :
-
-- **22** : SSH
-- **80** : HTTP
-
----
-<img width="501" height="681" alt="image" src="https://github.com/user-attachments/assets/0f3b0c67-7a19-49b5-8a33-6784aad7882e" />
+## Architecture déployée
+* **Application Load Balancer (ALB) :** Répartit le trafic entrant (HTTP port 80) sur plusieurs instances EC2 situées dans des sous-réseaux publics.
+* **Target Group & Health Checks :** Vérifie en continu la santé des instances (HTTP 200).
+* **Launch Template :** Modèle de configuration EC2 intégrant la bonne AMI (Phase 2) et le profil IAM `LabInstanceProfile`.
+* **Auto Scaling Group (ASG) :** Déploie les instances dans des sous-réseaux privés (min: 2, max: 4).
+* **Target Tracking Scaling Policy :** Alarme CloudWatch configurée (pour les besoins du lab) pour déclencher une mise à l'échelle dès que le CPU moyen dépasse **20%**.
 
 ## Déploiement
 
-### Initialiser Terraform
+1. **Initialiser et appliquer l'infrastructure :**
+   \`\`\`bash
+   terraform init
+   terraform apply -auto-approve
+   \`\`\`
+2. **Récupérer l'URL de l'application :**
+   Terraform affichera en sortie la variable `alb_dns_name`. Copiez cette URL dans un navigateur pour accéder à l'application.
 
-```bash
-terraform init
-```
-
-### Vérifier la configuration
-
-```bash
-terraform validate
-```
-
-### Voir le plan
-
-```bash
-terraform plan
-```
-
-### Déployer l'infrastructure
-
-```bash
-terraform apply
-```
-
-## Accès à l'application
-Une fois l'infrastructure déployée, l'application est accessible via l'adresse publique de l'instance EC2 :
-```bash
-http://PUBLIC_IP
-```
-Terraform affiche l'adresse IP dans les outputs après le déploiement.
-
+## Validation & Test de charge
+Pour prouver le bon fonctionnement de la mise à l'échelle (Scale-out) :
+1. Installer l'outil de test de charge :
+   \`\`\`bash
+   npm install -g loadtest
+   \`\`\`
+2. Lancer un bombardement de requêtes pendant 3 minutes (100 utilisateurs simultanés) :
+   \`\`\`bash
+   loadtest -t 180 -c 100 http://<VOTRE_ALB_DNS_NAME>/
+   \`\`\`
+3. Observer la console AWS (EC2 > Auto Scaling Groups > Activity) : de nouvelles instances sont automatiquement créées pour absorber la charge.
