@@ -1,4 +1,6 @@
-<img width="1024" height="1536" alt="image" src="https://github.com/user-attachments/assets/58302e7d-fb47-43ad-b0b7-d518bedb2f35" /># Phase 6 — Déploiement d’une application sur AWS ECS avec Terraform
+<img width="1024" height="1536" alt="image" src="https://github.com/user-attachments/assets/58302e7d-fb47-43ad-b0b7-d518bedb2f35" />
+
+# Phase 6 — Déploiement d’une application sur AWS ECS avec Terraform
 
 ## Présentation du projet
 
