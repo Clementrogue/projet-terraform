@@ -153,6 +153,7 @@ Grâce à la pipeline CI/CD :
 
 Cela permet d'avoir un **déploiement rapide, fiable et automatisé**.
 
+Voici le lien gitlab de la pipeline : https://gitlab.com/clement.rogue2003/projet-terraform
 ---
 
 # Améliorations possibles
