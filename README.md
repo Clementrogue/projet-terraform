@@ -34,7 +34,9 @@ Exécution du conteneur en simulant les variables d'environnement de la base de 
 docker run -d -p 8080:80 -e APP_DB_HOST=127.0.0.1 -e APP_DB_USER=nodeapp -e APP_DB_PASSWORD=student12 -e APP_DB_NAME=STUDENTS -e APP_PORT=80 student-app-repo:v1
 curl http://localhost:8080
 \`\`\`
-*(Vérification : Le code HTML de la page d'accueil doit s'afficher).*
+*(Vérification : Le code HTML de la page d'accueil s'affiche correctement, confirmant que le serveur Node.js tourne dans le conteneur).*
+
+![Résultat du test local Docker](chemin/vers/ton_image.jpg)
 
 **2. Test Cloud (AWS EC2) :**
 Déploiement de l'infrastructure de test Terraform :
