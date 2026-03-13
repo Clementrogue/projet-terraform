@@ -36,8 +36,6 @@ curl http://localhost:8080
 \`\`\`
 *(Vérification : Le code HTML de la page d'accueil s'affiche correctement, confirmant que le serveur Node.js tourne dans le conteneur).*
 
-![Résultat du test local Docker](chemin/vers/ton_image.jpg)
-
 **2. Test Cloud (AWS EC2) :**
 Déploiement de l'infrastructure de test Terraform :
 \`\`\`bash
