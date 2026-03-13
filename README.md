@@ -10,6 +10,10 @@ L'objectif de cette phase est de rendre l'application web hautement disponible e
 * **Auto Scaling Group (ASG) :** Déploie les instances dans des sous-réseaux privés (min: 2, max: 4).
 * **Target Tracking Scaling Policy :** Alarme CloudWatch configurée (pour les besoins du lab) pour déclencher une mise à l'échelle dès que le CPU moyen dépasse **20%**.
 
+
+<img width="1330" height="1810" alt="image" src="https://github.com/user-attachments/assets/d6535dc8-4ad6-421a-9fdf-895820f6e78c" />
+
+
 ## Déploiement
 
 1. **Initialiser et appliquer l'infrastructure :**
