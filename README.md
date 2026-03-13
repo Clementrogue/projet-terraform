@@ -35,3 +35,7 @@ Pour prouver le bon fonctionnement de la mise à l'échelle (Scale-out) :
    loadtest -t 180 -c 100 http://<VOTRE_ALB_DNS_NAME>/
    \`\`\`
 3. Observer la console AWS (EC2 > Auto Scaling Groups > Activity) : de nouvelles instances sont automatiquement créées pour absorber la charge.
+
+<img width="3054" height="1156" alt="image" src="https://github.com/user-attachments/assets/1a6171ac-c0a3-4c74-828d-50ee5b3576ac" />
+
+<img width="3032" height="1612" alt="image" src="https://github.com/user-attachments/assets/a2ccff37-0adb-44f3-abaa-1aca278530d8" />
