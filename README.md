@@ -1,78 +1,75 @@
-# Phase 6 — Deployment of Application on AWS ECS using Terraform
+<img width="1024" height="1536" alt="image" src="https://github.com/user-attachments/assets/58302e7d-fb47-43ad-b0b7-d518bedb2f35" /># Phase 6 — Déploiement d’une application sur AWS ECS avec Terraform
 
-## Project Overview
+## Présentation du projet
 
-This phase focuses on deploying a containerized application on **Amazon ECS (Elastic Container Service)** using **Terraform** as Infrastructure as Code.
+Cette phase du projet consiste à déployer une application conteneurisée sur **Amazon ECS (Elastic Container Service)** en utilisant **Terraform** pour automatiser la création de l’infrastructure.
 
-The objective is to provision a complete AWS infrastructure capable of running a Docker container on an ECS cluster using EC2 instances.
+L'objectif est de déployer une application Docker sur une infrastructure AWS entièrement configurée par **Infrastructure as Code (IaC)**.
 
-The infrastructure includes:
+L’infrastructure déployée comprend :
 
-* A **VPC**
-* Public **subnets**
-* **Internet Gateway**
-* **Route tables**
-* **Security groups**
-* **ECS Cluster**
-* **EC2 instances running ECS agent**
-* **Auto Scaling Group**
-* **Task Definition**
-* **ECS Service**
+* Un **VPC**
+* Deux **subnets publics**
+* Une **Internet Gateway**
+* Des **tables de routage**
+* Un **Security Group**
+* Un **cluster ECS**
+* Une **instance EC2 avec l’agent ECS**
+* Un **Auto Scaling Group**
+* Une **Task Definition ECS**
+* Un **Service ECS**
 
-The deployed container exposes a web application accessible through the public IP of the ECS instance.
+L’application est exécutée dans un **conteneur Docker** et accessible via l’adresse IP publique de l’instance EC2.
 
 ---
 
-# Architecture
+# Architecture de l’infrastructure
 
-The infrastructure deployed by Terraform follows this architecture:
+L’architecture déployée est la suivante :
 
 ```
 Internet
    │
-   │
 Internet Gateway
    │
-   ▼
 VPC (10.2.0.0/16)
    │
-   ├── Public Subnet A (10.2.1.0/24)
-   │        │
-   │        └── ECS EC2 Instance
-   │                │
-   │                └── Docker Container (Application)
+   ├── Subnet Public A (10.2.1.0/24)
+   │       │
+   │       └── Instance EC2 (ECS)
+   │              │
+   │              └── Conteneur Docker (Application)
    │
-   └── Public Subnet B (10.2.2.0/24)
-
+   └── Subnet Public B (10.2.2.0/24)
 ```
 
-Components used:
+Les principaux composants utilisés sont :
 
-| Component           | Description                            |
-| ------------------- | -------------------------------------- |
-| VPC                 | Custom network for the infrastructure  |
-| Subnets             | Public subnets where EC2 instances run |
-| Internet Gateway    | Allows internet access                 |
-| Security Group      | Controls inbound/outbound traffic      |
-| ECS Cluster         | Container orchestration service        |
-| Launch Template     | Configuration of EC2 instances         |
-| Auto Scaling Group  | Ensures ECS instance availability      |
-| ECS Task Definition | Defines container configuration        |
-| ECS Service         | Ensures tasks remain running           |
+| Composant          | Rôle                               |
+| ------------------ | ---------------------------------- |
+| VPC                | Réseau privé pour l’infrastructure |
+| Subnets            | Segmentation du réseau             |
+| Internet Gateway   | Accès Internet                     |
+| Security Group     | Contrôle des accès réseau          |
+| ECS Cluster        | Orchestration des conteneurs       |
+| Launch Template    | Configuration des instances EC2    |
+| Auto Scaling Group | Gestion automatique des instances  |
+| Task Definition    | Définition du conteneur            |
+| ECS Service        | Maintien des conteneurs actifs     |
 
 ---
 
-# Prerequisites
+# Prérequis
 
-Before running this project, ensure the following tools are installed:
+Avant de lancer le projet, les outils suivants doivent être installés :
 
-* Terraform >= 1.3
-* AWS CLI
-* Docker
-* AWS account
-* SSH key pair
+* **Terraform ≥ 1.3**
+* **AWS CLI**
+* **Docker**
+* Un **compte AWS**
+* Une **clé SSH**
 
-Configure AWS credentials:
+Configurer les identifiants AWS :
 
 ```bash
 aws configure
@@ -80,7 +77,7 @@ aws configure
 
 ---
 
-# Project Structure
+# Structure du projet
 
 ```
 phase6-ecs/
@@ -94,47 +91,48 @@ phase6-ecs/
 
 ---
 
-# Terraform Deployment
+# Déploiement de l’infrastructure
 
-Initialize Terraform:
+Initialiser Terraform :
 
 ```bash
 terraform init
 ```
 
-Validate configuration:
+Vérifier la configuration :
 
 ```bash
 terraform validate
 ```
 
-Check execution plan:
+Visualiser les ressources qui seront créées :
 
 ```bash
 terraform plan
 ```
 
-Deploy infrastructure:
+Déployer l’infrastructure :
 
 ```bash
 terraform apply
 ```
 
-Terraform will provision:
+Terraform va créer automatiquement :
 
-* VPC
-* Networking
-* ECS Cluster
-* EC2 instance
-* Docker container service
+* le VPC
+* les subnets
+* l’internet gateway
+* les règles réseau
+* le cluster ECS
+* l’instance EC2
+* le service ECS
+* le conteneur Docker
 
 ---
 
-# Accessing the Application
+# Accès à l’application
 
-After deployment, Terraform outputs the public subnet and cluster information.
-
-Retrieve the public IP of the ECS instance:
+Une fois le déploiement terminé, récupérer l’adresse IP publique de l’instance EC2 :
 
 ```bash
 aws ec2 describe-instances \
@@ -143,37 +141,37 @@ aws ec2 describe-instances \
 --output text
 ```
 
-Then open the application in a browser:
+Accéder ensuite à l’application via le navigateur :
 
 ```
-http://PUBLIC_IP
+http://IP_PUBLIQUE
 ```
 
-or
+ou
 
 ```
-http://PUBLIC_IP:81
+http://IP_PUBLIQUE:81
 ```
 
-depending on the configured port mapping.
+selon la configuration du port.
 
 ---
 
-# Verifying ECS Deployment
+# Vérification du déploiement ECS
 
-Check ECS cluster:
+Lister les clusters ECS :
 
 ```bash
 aws ecs list-clusters
 ```
 
-Check running tasks:
+Lister les tâches en cours d’exécution :
 
 ```bash
 aws ecs list-tasks --cluster student-phase6-cluster
 ```
 
-Check ECS service:
+Vérifier le service ECS :
 
 ```bash
 aws ecs describe-services \
@@ -183,39 +181,39 @@ aws ecs describe-services \
 
 ---
 
-# Accessing the ECS Instance
+# Connexion à l’instance ECS
 
-SSH connection:
+Connexion SSH :
 
 ```bash
-ssh -i vockey.pem ec2-user@PUBLIC_IP
+ssh -i vockey.pem ec2-user@IP_PUBLIQUE
 ```
 
-Verify running containers:
+Vérifier les conteneurs Docker :
 
 ```bash
 docker ps
 ```
 
-Check container logs:
+Voir les logs du conteneur :
 
 ```bash
-docker logs CONTAINER_ID
+docker logs ID_CONTENEUR
 ```
 
 ---
 
-# Troubleshooting
+# Dépannage
 
-If the application is not accessible:
+Si l’application n’est pas accessible :
 
-### Check ECS tasks
+### Vérifier les tâches ECS
 
 ```bash
 aws ecs list-tasks --cluster student-phase6-cluster
 ```
 
-### Check ECS service events
+### Vérifier les événements du service
 
 ```bash
 aws ecs describe-services \
@@ -224,13 +222,13 @@ aws ecs describe-services \
 --query "services[0].events"
 ```
 
-### Verify container status on EC2
+### Vérifier les conteneurs sur l’instance
 
 ```bash
 docker ps -a
 ```
 
-### Check if port is listening
+### Vérifier l’écoute du port
 
 ```bash
 sudo ss -tulpn | grep :80
@@ -238,32 +236,13 @@ sudo ss -tulpn | grep :80
 
 ---
 
-# Destroy Infrastructure
+# Suppression de l’infrastructure
 
-To remove all resources:
+Pour supprimer toutes les ressources AWS :
 
 ```bash
 terraform destroy
 ```
 
----
-
-# Technologies Used
-
-* **AWS ECS**
-* **EC2**
-* **Terraform**
-* **Docker**
-* **AWS CLI**
-
----
-
-# Learning Outcomes
-
-Through this phase, the following skills were developed:
-
-* Infrastructure as Code with Terraform
-* Container deployment on ECS
-* AWS networking configuration
-* ECS task and service management
-* Debugging containerized applications
+Projet Cloud — Déploiement d’infrastructure sur AWS
+Phase 6 — ECS avec Terraform
